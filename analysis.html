@@ -55,7 +55,7 @@
         // list = ['X','Y','B1_PER_ID1','B1_PER_ID3','B1_ALT_ID','B1_PARCEL_NBR','']
         // result = {
         // }  
-                    // incomeWithExpenditure.push(result);
+        // incomeWithExpenditure.push(result);
         result = []
         li.forEach(
             function(d2,i){
@@ -85,7 +85,7 @@
                 type:'pie'
             },
             title:{
-                text:'Buildings in Recent Years'
+                text:'<h3>Buildings in Recent Years (2010-2017)</h3>'
             },
         // subtitle: {
      //        text: 'Click the slices to view versions. Source: <a href="http://statcounter.com" target="_blank">statcounter.com</a>'
@@ -158,7 +158,7 @@
 
 
         //
-        console.log(data1[0])
+        // console.log(data1[0])
         
         // build the data for the first layer
         dataByBuilding = [{
@@ -178,20 +178,89 @@
         // loading the high charts
         loadingHighCharts(dataByBuilding, data2);
         var fileName2 = "Building_Details.csv";
-        console.log("ffff");
+        // console.log("ffff");
+        d3.csv(fileName2,initiate,loadDetails);
+
+    }
+
+    function load_data_by_year(error,data){
+        if (error) throw error;
+
+        //Create a hash 
+        buildingHash = {};
+
+        // print the original data
+        // console.log(data[0].count+1)
+        //process the js data group by year first
+        data.forEach(function(d,i){
+            if (!(d.type in buildingHash)){
+                // console.log(d.count)
+                buildingHash[d.year] = d.count;
+            }else{
+                buildingHash[d.year] += d.count;
+            }
+        })  
+
+        data1 = [];
+        data2 = [];
+        // console.log(buildingHash)
+        // iterate over the key, building the objects
+        for(var key in buildingHash){
+            data1.push(
+                {"name":key,
+                "y": buildingHash[key],
+                "drilldown": key
+                }
+            );
+        }
+
+        typeHash = {};
+        for(key in buildingHash){
+               typeHash[key] = []
+                data.forEach(function(d,i){
+                    if(d.type==key){
+                        typeHash[key].push([d.type,d.count]);
+                }
+            })
+        }
+
+
+        //
+        // console.log(data1[0])
+        
+        // build the data for the first layer
+        dataByBuilding = [{
+            "name":"Buildings",
+            "colorByPoint":true,
+            "data":data1 }];
+
+        // console.log(dataByBuilding)
+
+        for(key in buildingHash){
+            data2.push(
+            {"name":key,
+             "id": key,
+             "data":typeHash[key]
+            });
+        }
+        // loading the high charts
+        loadingHighCharts(dataByBuilding, data2);
+        var fileName2 = "Building_Details.csv";
+        // console.log("ffff");
         d3.csv(fileName2,initiate,loadDetails);
 
     }
 
     function loadDetails(error,dataSet){   
-        console.log(dataSet[0])
+        // console.log(dataSet[0])
         // var str = "OBJECTID,B1_PER_ID1,B1_PER_ID3,B1_ALT_ID,B1_PARCEL_NBR,B1_HSE_NBR_START,B1_STR_DIR,B1_STR_NAME,B1_STR_SUFFIX,B1_STR_SUFFIX_DIR,LSN,APPLICANT_BUS_NAME,APPLICANT_FULL_NAME,B1_PER_GROUP,B1_PER_TYPE,B1_PER_SUB_TYPE,B1_PER_CATEGORY,GENERAL_TYPE,PERMIT_STATUS,SQFT,G3_VALUE_TTL,ISSUED_DT,ISSUED_YEAR,LAST_STATUS_DT,ZIP_CODE,COLS_KEY,GEO_SOURCE";
         // console.log(str)
         // var li = ['B1_STR_NAME','OBJECTID','APPLICANT_BUS_NAME','APPLICANT_FULL_NAME','B1_ALT_ID','LSN','ZIP_CODE','B1_PER_TYPE','PERMIT_STATUS','ISSUED_YEAR']
         //slice
-        // dataSet = dataSet.slice(0);
+        dataSet = dataSet
+        // dataSet2 = dataSet
         //slice
-
+        // dataset
         // var arrNames = str.split(',');
         var arrNames =['Name','ID','Applicant Business','Applicant Name','ALT ID','Address','Zip Code','Type','Permit Status','Issued Year']
         var nameColumns = [];
@@ -207,6 +276,8 @@
                 $('#DetailsData').DataTable({
                     data:dataSet,
                     columns: nameColumns,
+                    "deferLoading": 1000000,
+                    "pageLength": 15,
                     // dom: 'Bfrtip',
                     dom: 'Bfrtip',
                     buttons: [
@@ -243,7 +314,7 @@
           <ul class="nav navbar-nav">
             <li><a href="index.html">Home</a></li>
             <li class="active"><a href="map_interaction.html">Interactive Map</a></li>
-            <li><a href="analysis.html">Detailed Data</a></li>
+            <li><a href="analysis.html">Data Analysis</a></li>
           </ul>
           <!-- <button class="btn btn-danger navbar-btn">Button</button> -->
         </div>
@@ -253,17 +324,15 @@
     <!-- The main content -->
     <div ID="main-content">
       
-
-       <div ID = "container">
-         <h2>Charts and Analysis</h2>
-          
+    <h2>Data and Analysis</h2>
+       <div style ="height:40%" ID = "container">
+               
        </div>
        <!-- <div>
        
         </div> -->
-       <div style = "margin:10%"ID="Details_Table">
-        <br>
-        <h2 style ="color:purple">Details Table View</h2>
+       <div style = "margin:5%;height:40%" ID="Details_Table">
+        <h3 style ="color:purple">Details Table View</h3>
         
         <table id="DetailsData" class="display" style="width:100%">
 
